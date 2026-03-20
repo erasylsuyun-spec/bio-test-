@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧬 BIOLOGY PRO TEST 2.0</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --accent: #e74c3c;
+            --dark-bg: #0f172a;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), 
+                        url('https://images.unsplash.com');
+            background-size: cover;
+            background-attachment: fixed;
+            color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(30, 41, 59, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+        #timer-box {
+            position: sticky;
+            top: 0;
+            background: var(--accent);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            z-index: 100;
+        }
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background: #334155;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .q-card {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            border-left: 5px solid var(--primary);
+        }
+        .option {
+            display: block;
+            padding: 12px;
+            margin: 8px 0;
+            background: #1e293b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .option:hover {
+            background: #334155;
+            border-color: var(--primary);
+        }
+        input[type="radio"] { margin-right: 10px; }
+        button {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background: #27ae60; transform: translateY(-2px); }
+        #result-box {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: #1e293b;
+            border-radius: 20px;
+            margin-top: 30px;
+        }
+        .grade { font-size: 30px; font-weight: bold; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="timer-box">⏳ Қалған уақыт: 30:00</div>
+    <div class="progress-container"><div id="progress-bar"></div></div>
+    
+    <h1>🧬 BIOLOGY ELITE TEST</h1>
+    <div id="quiz"></div>
+    <button id="submit-btn" onclick="showResults()">Нәтижені есептеу</button>
+
+    <div id="result-box">
+        <h2>Сенің нәтижең: <span id="score">0</span> / 40</h2>
+        <div id="final-grade" class="grade"></div>
+        <p id="comment"></p>
+        <button onclick="location.reload()">Қайта тапсыру</button>
+    </div>
+</div>
+
+<script>
+// Барлық 40 сұрақ (8-10 сынып)
+const quizData = [
+    { q: "Кеңірдектің орташа диаметрі қанша?", a: "1.5-2.5 см", o: ["0.5 см", "1.5-2.5 см", "3-4 см", "5 см"] },
+    { q: "Адам денесіндегі ең ірі без?", a: "Бауыр", o: ["Ұйқы безі", "Бауыр", "Қалқанша без", "Бүйрек"] },
+    { q: "Қанның ұюына қатысатын витамин?", a: "K", o: ["A", "C", "D", "K"] },
+    { q: "Жүректің сол жақ қарыншасынан басталатын тамыр?", a: "Аорта", o: ["Өкпе артериясы", "Аорта", "Қуыс вена", "Артериола"] },
+    { q: "Адамда неше жұп қабырға бар?", a: "12", o: ["10", "12", "14", "24"] },
+    { q: "Көздің жарық сезгіш рецепторлары?", a: "Торлы қабықта", o: ["Ақ қабықта", "Қасаң қабықта", "Торлы қабықта", "Нұрлы қабықта"] },
+    { q: "Дыбыс сіңірлері қай жерде орналасқан?", a: "Көмейде", o: ["Жұтқыншақта", "Көмейде", "Кеңірдекте", "Ауыз қуысында"] },
+    { q: "Қанға оттегіні қосып алатын нәруыз?", a: "Гемоглобин", o: ["Фибриноген", "Гемоглобин", "Альбумин", "Инсулин"] },
+    { q: "Бүйректің құрылымдық бірлігі?", a: "Нефрон", o: ["Нейрон", "Нефрон", "Аксон", "Альвеола"] },
+    { q: "Мишық нені реттейді?", a: "Тепе-теңдік", o: ["Тыныс алуды", "Ас қорытуды", "Тепе-теңдік", "Көруді"] },
+    { q: "Ең кіші сүйек — үзеңгі қайда орналасқан?", a: "Ортаңғы құлақ", o: ["Ішкі құлақ", "Сыртқы құлақ", "Ортаңғы құлақ", "Мұрын қуысы"] },
+    { q: "Асқазандағы қышқыл ортаны не түзеді?", a: "Тұз қышқылы", o: ["Күкірт қышқылы", "Тұз қышқылы", "Сірке қышқылы", "Өт"] },
+    { q: "Артериялық қан қай тамырда болады?", a: "Өкпе венасында", o: ["Өкпе артериясында", "Өкпе венасында", "Қуыс венада", "Оң жақ қарыншада"] },
+    { q: "ДНҚ-да Гуанинге (Г) комплементарлы нуклеотид?", a: "Цитозин", o: ["Аденин", "Тимин", "Цитозин", "Урацил"] },
+    { q: "Тұқым қуалайтын өзгергіштік?", a: "Мутациялық", o: ["Модификациялық", "Мутациялық", "Фенотиптік", "Сыртқы"] },
+    { q: "Мендельдің І-заңы қалай аталады?", a: "Біркелкілік заңы", o: ["Ажырау заңы", "Біркелкілік заңы", "Тәуелсіз ажырау", "Таза гаметалар"] },
+    { q: "Дальтонизм гені қай хромосомада орналасқан?", a: "X", o: ["Y", "X", "21-хромосома", "13-хромосома"] },
+    { q: "Нәруыз синтезі қай органоидта жүреді?", a: "Рибосома", o: ["Лизосома", "Рибосома", "Вакуоль", "Ядро"] },
+    { q: "Эволюцияның қозғаушы күші?", a: "Табиғи сұрыпталу", o: ["Тұқым қуалау", "Табиғи сұрыпталу", "Өзгергіштік", "Оқшаулану"] },
+    { q: "ДНҚ-дан РНҚ-ның көшірілуі?", a: "Транскрипция", o: ["Трансляция", "Транскрипция", "Репликация", "Миоз"] },
+    { q: "Адамдағы хромосома саны?", a: "46", o: ["23", "44", "46", "48"] },
+    { q: "Даун синдромының себебі?", a: "Трисомия 21", o: ["Хромосома жетіспеуі", "Трисомия 21", "Мутация", "Вирус"] },
+    { q: "Популяция — бұл эволюцияның...?", a: "Ең кіші бірлігі", o: ["Нәтижесі", "Ең кіші бірлігі", "Факторы", "Ортасы"] },
+    { q: "Аналогты мүшелер?", a: "Көбелек пен құс қанаты", o: ["Ит аяғы мен кит жүзбеқанаты", "Көбелек пен құс қанаты", "Қол мен аяқ", "Мұртша мен сабақ"] },
+    { q: "Жасуша мембранасының негізі?", a: "Билипидті қабат", o: ["Нәруыздар", "Билипидті қабат", "Көмірсулар", "АТФ"] },
+    { q: "Энергия (АТФ) қайда синтезделеді?", a: "Митохондрия", o: ["Рибосома", "Лизосома", "Митохондрия", "Гольджи жиынтығы"] },
+    { q: "Фотосинтездің жарық фазасында не бөлінеді?", a: "Оттегі", o: ["Глюкоза", "Оттегі", "АТФ", "Су"] },
+    { q: "Митоздың хромосомалар экваторға тізілетін фазасы?", a: "Метафаза", o: ["Профаза", "Метафаза", "Анафаза", "Телофаза"] },
+    { q: "Мейозда хромосомалардың айқасуы?", a: "Кроссинговер", o: ["Конъюгация", "Кроссинговер", "Репликация", "Интерфаза"] },
+    { q: "Гликолиз нәтижесінде неше АТФ түзіледі?", a: "2", o: ["2", "36", "38", "0"] },
+    { q: "Нәруыздың бірінші реттік құрылымы?", a: "Аминқышқылдар тізбегі", o: ["Спираль", "Шиыршық", "Аминқышқылдар тізбегі", "Глобула"] },
+    { q: "Ферменттердің атқаратын қызметі?", a: "Катализатор", o: ["Құрылыс", "Катализатор", "Энергия", "Тасымалдау"] },
+    { q: "ДНҚ екі еселенуі қалай аталады?", a: "Репликация", o: ["Транскрипция", "Репликация", "Трансляция", "Митоз"] },
+    { q: "Прокариоттарға не жатады?", a: "Бактериялар", o: ["Өсімдіктер", "Жануарлар", "Бактериялар", "Саңырауқұлақтар"] },
+    { q: "Жасушаны қорыту (ыдырату) мүшесі?", a: "Лизосома", o: ["Вакуоль", "Лизосома", "Рибосома", "Митохондрия"] },
+    { q: "АТФ молекуласының толық аты?", a: "Аденозинтрифосфат", o: ["Аденинтимин", "Аденозиндифосфат", "Аденозинтрифосфат", "Аминтрифосфат"] },
+    { q: "Биологиялық катализаторлар?", a: "Ферменттер", o: ["Витаминдер", "Гормондар", "Ферменттер", "Антиденелер"] },
+    { q: "Глюкозаның химиялық формуласы?", a: "C6H12O6", o: ["C5H10O5", "C6H12O6", "C12H22O11", "CO2"] },
+    { q: "Жарық энергиясын химиялық энергияға айналдыратын органоид?", a: "Хлоропласт", o: ["Хромопласт", "Лейкопласт", "Хлоропласт", "Митохондрия"] },
+    { q: "Кроссинговер мейоздың қай фазасында жүреді?", a: "Профаза I", o: ["Профаза I", "Метафаза I", "Анафаза II", "Профаза II"] }
+];
+
+const quizEl = document.getElementById('quiz');
+let timeLeft = 1800; // 30 минут
+
+// Тестті жүктеу
+function initQuiz() {
+    quizData.forEach((data, i) => {
+        const card = document.createElement('div');
+        card.className = 'q-card';
+        card.innerHTML = `
+            <p><strong>${i+1}. ${data.q}</strong></p>
+            ${data.o.map(opt => `
+                <label class="option" onclick="updateProgress()">
+                    <input type="radio" name="q${i}" value="${opt}"> ${opt}
+                </label>
+            `).join('')}
+        `;
+        quizEl.appendChild(card);
+    });
+}
+
+// Прогрессті жаңарту
+function updateProgress() {
+    const checkedCount = document.querySelectorAll('input[type="radio"]:checked').length;
+    const progress = (checkedCount / quizData.length) * 100;
+    document.getElementById('progress-bar').style.width = progress + '%';
+}
+
+// Таймер логикасы
+const timerInterval = setInterval(() => {
+    let min = Math.floor(timeLeft / 60);
+    let sec = timeLeft % 60;
+    document.getElementById('timer-box').innerHTML = `⏳ Қалған уақыт: ${min}:${sec < 10 ? '0' : ''}${sec}`;
+    if (timeLeft <= 0) { clearInterval(timerInterval); showResults(); }
+    timeLeft--;
+}, 1000);
+
+// Нәтиже шығару
+function showResults() {
+    clearInterval(timerInterval);
+    let score = 0;
+    quizData.forEach((data, i) => {
+        const sel = document.querySelector(`input[name="q${i}"]:checked`);
+        if (sel && sel.value === data.a) score++;
+    });
+
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('submit-btn').style.display = 'none';
+    document.getElementById('timer-box').style.display = 'none';
+    document.getElementById('result-box').style.display = 'block';
+    document.getElementById('score').innerText = score;
+
+    const gradeEl = document.getElementById('final-grade');
+    const commentEl = document.getElementById('comment');
+    
+    if (score >= 35) { gradeEl.innerText = "БАҒА: 5"; gradeEl.style.color = "#2ecc71"; commentEl.innerText = "Керемет! Сен биологияның нағыз маманысың!"; }
+    else if (score >= 25) { gradeEl.innerText = "БАҒА: 4"; gradeEl.style.color = "#f1c40f"; commentEl.innerText = "Жақсы нәтиже! Біраз қайталау керек."; }
+    else { gradeEl.innerText = "БАҒА: 3"; gradeEl.style.color = "#e74c3c"; commentEl.innerText = "Көбірек ізденуің керек. Кітапты қайта аш!"; }
+}
+
+initQuiz();
+</script>
+</body>
+</html>
